@@ -9,7 +9,7 @@ import { mapNumberTextToNumber } from "./map-number-text-to-actual-number";
  *
  *
  */
-const filePath = "./input1.txt";
+const FILE_PATH = "./input1.txt";
 
 // const testInput = ["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"];
 
@@ -44,22 +44,26 @@ function solve(s: string): number {
   const lastDigit = mapNumberTextToNumber(matches[matches.length - 1] ?? "");
 
   const concatenatedNumber = Number(firstDigit.concat(lastDigit));
-  console.log(concatenatedNumber);
   return concatenatedNumber;
 }
 
-fs.readFile(filePath, "utf8", (err, data) => {
-  if (err) {
-    console.error("cannot read");
-  } else {
-    const splitString = data.split("\n");
-
-    // sum everything
-    const result = splitString.reduce(
-      (acc, currentValue) => acc + solve(currentValue),
-      0,
-    );
-
-    console.log(result);
-  }
-});
+export function solvePuzzleFor(filePath: string = FILE_PATH): Promise<number> {
+  const x = new Promise<number>((resolve, reject) => {
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        console.error("cannot read");
+        reject(0);
+      } else {
+        const splitString = data.split("\n");
+        // sum everything
+        const result = splitString.reduce(
+          (acc, currentValue) => acc + solve(currentValue),
+          0,
+        );
+        resolve(result);
+      }
+    });
+  });
+  return x;
+}
+solvePuzzleFor(FILE_PATH).then(console.log);
