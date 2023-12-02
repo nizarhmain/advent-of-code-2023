@@ -19,10 +19,59 @@ function solve(s: string): number {
   console.log(`${gameId} - ${x}`);
 
   if (x === true) {
+    // return the max here instead
     return gameId;
   } else {
     return 0;
   }
+}
+//
+// PART TWO: what is the fewest number of cubes of each color that could have been in the bag to make the game possible?
+//
+// game needs to be possible
+// r is for red balls: We need to take the max(r)
+// b is for red balls: We need to take the max(b)
+// g is for red balls: We need to take the max(g)
+// max(r) * max(b) * max(g)
+//
+function solvePartTwo(s: string): number {
+  if (s.length === 0) {
+    return 0;
+  }
+  const separateIdAndBalls = s.split(":");
+
+  // ['1 blue, 2 green', '3 green, 4 blue, 1 red', '1 green, 1 blue']
+  return minimumNeeded(separateIdAndBalls[1]);
+}
+
+function minimumNeeded(s: string): number {
+  const regex = /(\d+)\s*(green|red|blue)/g;
+
+  const matches = [...s.matchAll(regex)];
+  let reds: number[] = [];
+  let blues: number[] = [];
+  let greens: number[] = [];
+
+  matches.forEach((match) => {
+    const colorName = match[2];
+    const colorValue = Number(match[1]);
+    if (colorName === "red") {
+      reds.push(colorValue);
+    }
+    if (colorName === "green") {
+      greens.push(colorValue);
+    }
+    if (colorName === "blue") {
+      blues.push(colorValue);
+    }
+  });
+
+  let redMax = Math.max(...reds);
+  let blueMax = Math.max(...blues);
+  let greenMax = Math.max(...greens);
+
+  const sum = redMax * blueMax * greenMax;
+  return sum;
 }
 
 function isGamePossible(s: string): boolean {
@@ -70,7 +119,8 @@ export function solvePuzzleFor(filePath: string = FILE_PATH): Promise<number> {
         const splitString = data.split("\n");
 
         const x = splitString.reduce(
-          (acc, currentValue) => acc + solve(currentValue),
+          // replace with solve for part one
+          (acc, currentValue) => acc + solvePartTwo(currentValue),
           0,
         );
         resolve(x);
