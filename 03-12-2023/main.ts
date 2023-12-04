@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { arrayRange, isSymbol } from "./util";
 
-const FILE_PATH = "./input2.txt";
+const FILE_PATH = "./input3.txt";
 
 const DIGIT_REGEX = /\d+/g;
 
@@ -13,7 +13,6 @@ type MatchType = {
 };
 
 function getIndices(inputString: string): MatchType[] {
-  console.log(inputString);
   let match;
   const indices = [];
 
@@ -48,7 +47,7 @@ function checkFor(
 // takes the string below
 // takes the string to analyze
 // all of them can be undefined
-function solvePartOne(s: string[]) {
+function solvePartOne(s: string[]): number {
   const sus: MatchType[] = [];
 
   // for every row
@@ -57,48 +56,81 @@ function solvePartOne(s: string[]) {
     const allYouNeed = getIndices(s[i]);
 
     allYouNeed.forEach((indicesToCheck) => {
-      indicesToCheck.indices.forEach((interestingIndex) => {
+      for (const interestingIndex of indicesToCheck.indices) {
+        // check on the right for the first
+        if (s[i] !== undefined) {
+          // check on the left of the first digit
+          const onLeft = s[i][indicesToCheck.indices[0] - 1];
+
+          // check on the right of the first digit
+          const onRight =
+            s[i][indicesToCheck.indices[indicesToCheck.indices.length - 1] + 1];
+
+          if (isSymbol(onLeft)) {
+            sus.push(indicesToCheck);
+            console.log("on left", onLeft);
+            break;
+          }
+
+          if (isSymbol(onRight)) {
+            console.log("on right", onRight);
+            sus.push(indicesToCheck);
+            break;
+          }
+        }
+
         // check below
         if (s[i + 1] !== undefined) {
           // check below
-          const below = s[i + 1][interestingIndex];
-          checkFor(sus, below, i + 1, interestingIndex, indicesToCheck);
+          const below: string | undefined = s[i + 1][interestingIndex];
+          if (isSymbol(below)) {
+            sus.push(indicesToCheck);
+            break;
+          }
           // check diagonal left
-          const diagoLeft = s[i + 1][interestingIndex - 1];
-          checkFor(sus, diagoLeft, i + 1, interestingIndex - 1, indicesToCheck);
+          const diagoLeft: string | undefined = s[i + 1][interestingIndex - 1];
+          if (isSymbol(diagoLeft)) {
+            sus.push(indicesToCheck);
+            break;
+          }
           // check diagonal right
           const diagoRight: string | undefined = s[i + 1][interestingIndex + 1];
-          checkFor(
-            sus,
-            diagoRight,
-            i + 1,
-            interestingIndex + 1,
-            indicesToCheck,
-          );
+          if (isSymbol(diagoRight)) {
+            sus.push(indicesToCheck);
+            break;
+          }
         }
 
         // check above
         if (s[i - 1] !== undefined) {
           // check below
           const below = s[i - 1][interestingIndex];
-          checkFor(sus, below, i - 1, interestingIndex, indicesToCheck);
+          if (isSymbol(below)) {
+            sus.push(indicesToCheck);
+            break;
+          }
           // check diagonal left
           const diagoLeft = s[i - 1][interestingIndex - 1];
+          if (isSymbol(diagoLeft)) {
+            sus.push(indicesToCheck);
+            break;
+          }
           checkFor(sus, diagoLeft, i - 1, interestingIndex - 1, indicesToCheck);
           // check diagonal right
           const diagoRight: string | undefined = s[i - 1][interestingIndex + 1];
-          checkFor(
-            sus,
-            diagoRight,
-            i - 1,
-            interestingIndex + 1,
-            indicesToCheck,
-          );
+          if (isSymbol(diagoRight)) {
+            sus.push(indicesToCheck);
+            break;
+          }
         }
-      });
+      }
     });
   }
-  sus.forEach((x) => console.log(`suuuus is ${x.value} 🧾`));
+  const sum = sus.reduce(
+    (acc, currentValue) => (acc += Number(currentValue.value)),
+    0,
+  );
+  return sum;
 }
 
 export function solvePuzzleFor(filePath: string = FILE_PATH): Promise<number> {
@@ -109,8 +141,8 @@ export function solvePuzzleFor(filePath: string = FILE_PATH): Promise<number> {
         reject(0);
       } else {
         const splitString = data.split("\n").filter((x) => x.length > 0);
-        solvePartOne(splitString);
-        resolve(0);
+        const res = solvePartOne(splitString);
+        resolve(res);
       }
     });
   });
