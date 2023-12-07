@@ -7,3 +7,5 @@ export const arrayRange = (start: number, stop: number, step: number) =>
 
 export const isSymbol = (s: string) =>
   (!isNaN(Number(s)) || s !== ".") && s !== undefined;
+
+export const isNumber = (s: string) => !isNaN(Number(s)) && s !== undefined;
