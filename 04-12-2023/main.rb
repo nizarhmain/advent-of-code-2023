@@ -1,9 +1,13 @@
-# typed: true 
-extend T::Sig
+# typed: false 
+file_path = 'input2.txt'
 
-sig {params(x: Integer).void}
-def foo(x)
-  puts(x + 1)
+# Open the file in read mode
+File.open(file_path, 'r') do |file|
+  # read first line
+  puts file.first.split('|')
+  # file.each_line do |line|
+  #   # Print each line to the console
+  #   puts line
+  # end
 end
 
-foo("not an int")
