@@ -1,13 +1,42 @@
-# typed: false 
-file_path = 'input2.txt'
+# this means that strings can't be changed here
+# frozen_string_literal: true
 
-# Open the file in read mode
-File.open(file_path, 'r') do |file|
-  # read first line
-  puts file.first.split('|')
-  # file.each_line do |line|
-  #   # Print each line to the console
-  #   puts line
-  # end
+file_path = 'input.txt'
+
+# num == 3
+def rec_double(num)
+  return 0 if num.zero?
+  return 1 if num == 1
+  return 2 if num == 2
+
+  # rec_double(2) * 2
+  # 2 * 2
+  # 4
+  rec_double(num - 1) * 2
 end
 
+# puts rec_double(6)
+
+File.open(file_path, 'r') do |file|
+  count = 0
+  # Read first line
+  file.each_line do |new_line|
+    line = new_line.split('|')
+    # puts 'This is the winning combo 🤴'
+    winning_numbers = line[0].split(':')[1].split(' ')
+    # puts winning_numbers
+    # puts 'This is what you got 📘'
+    your_numbers = line[1].split(' ')
+    # Iterate over your_numbers
+    # 1 + 1 + 2 + 4 = 4 * 2
+    # 1 + 1 + 2 = 3 * 2
+    matches = 0
+    your_numbers.each do |your_number|
+      matches += 1 if winning_numbers.include?(your_number)
+    end
+    puts "matches: #{matches}"
+    count += rec_double(matches)
+    # puts matches
+  end
+  puts "count: #{count}"
+end
