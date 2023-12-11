@@ -1,7 +1,7 @@
 # this means that strings can't be changed here
 # frozen_string_literal: true
 
-file_path = 'input.txt'
+DEFAULT_FILE_PATH = 'input2.txt'
 
 # num == 3
 def rec_double(num)
@@ -16,11 +16,15 @@ def rec_double(num)
 end
 
 # puts rec_double(6)
-
-File.open(file_path, 'r') do |file|
+#
+def sum_from_array(array)
   count = 0
-  # Read first line
-  file.each_line do |new_line|
+  array.each do |new_line|
+    # puts new_line
+    # puts new_line.class
+    # puts new_line
+    # puts new_line
+    # puts new_line.class
     line = new_line.split('|')
     # puts 'This is the winning combo 🤴'
     winning_numbers = line[0].split(':')[1].split(' ')
@@ -34,9 +38,20 @@ File.open(file_path, 'r') do |file|
     your_numbers.each do |your_number|
       matches += 1 if winning_numbers.include?(your_number)
     end
-    puts "matches: #{matches}"
+    # puts "matches: #{matches}"
     count += rec_double(matches)
-    # puts matches
   end
   puts "count: #{count}"
 end
+
+def sum_from_file(file_path)
+  File.open(file_path, 'r') do |file|
+    # Read first line
+    lines = file.readlines
+    puts lines.length
+    sum_from_array(lines)
+  end
+end
+
+# this is to solve 1
+# sum_from_file(DEFAULT_FILE_PATH)
