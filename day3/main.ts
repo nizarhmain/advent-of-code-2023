@@ -171,7 +171,7 @@ function solvePartTwo(s: string[]): number {
   console.log(sumReduce);
 
   const stuff = sumReduce.reduce((acc, currentValue) => {
-    // exmaple [[32, 16], [1, 2]]
+    // example [[32, 16], [1, 2]]
     // should be (32 * 16) + 1 * 2
     // first run the * and then run the +
     const x =
