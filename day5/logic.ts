@@ -100,5 +100,36 @@ export function parseStringToMapper(s: string): MappingParams {
   };
 }
 
+export function mergeRanges(ranges: { start: number; range: number }[]) {
+  if (ranges.length <= 1) {
+    return ranges; // No need to merge if there's only one range or none
+  }
+
+  // Sort the ranges by their start values
+  ranges.sort((a: any, b: any) => a.start - b.start);
+
+  const mergedRanges = [ranges[0]];
+
+  for (let i = 1; i < ranges.length; i++) {
+    const currentRange = ranges[i];
+    const lastMergedRange = mergedRanges[mergedRanges.length - 1];
+
+    // Check for overlap
+    if (currentRange.start <= lastMergedRange.start + lastMergedRange.range) {
+      // Merge ranges
+      lastMergedRange.range =
+        Math.max(
+          lastMergedRange.start + lastMergedRange.range,
+          currentRange.start + currentRange.range,
+        ) - lastMergedRange.start;
+    } else {
+      // No overlap, add the current range to the result
+      mergedRanges.push(currentRange);
+    }
+  }
+
+  return mergedRanges;
+}
+
 // const params = parseStringToMapper("50 98 2");
 // const deduced_map = mapper(params);
