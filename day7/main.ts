@@ -1,6 +1,5 @@
 import { readFromFile } from "../util/readFromFile";
 
-console.log("ioquweoiuqwe");
 function countOccurrences(str: string, char: string) {
   let count = 0;
   for (let i = 0; i < str.length; i++) {
@@ -15,7 +14,8 @@ const powerMap = new Map([
   ["A", 14],
   ["K", 13],
   ["Q", 12],
-  ["J", 11],
+  // for part 1
+  // ["J", 11],
   ["T", 10],
   ["9", 9],
   ["8", 8],
@@ -25,6 +25,8 @@ const powerMap = new Map([
   ["4", 4],
   ["3", 3],
   ["2", 2],
+  // for part 2
+  ["J", 1],
 ]);
 
 type Hand = {
@@ -67,17 +69,40 @@ readFromFile(filePath).then((x) => {
     return calculateRank(card);
   });
 
-  // before
-  // console.log(cards);
+  cards.sort((originalA: Hand[], originalb: Hand[]) => {
+    const tempMaxA = Math.max(
+      ...originalA.filter((_) => _.letter !== "J").map((x) => x.count),
+    );
+    const tempMaxB = Math.max(
+      ...originalb.filter((_) => _.letter !== "J").map((x) => x.count),
+    );
 
-  cards.sort((a: Hand[], b: Hand[]) => {
-    const maxA = Math.max(...a.map((x) => x.count));
-    const maxB = Math.max(...b.map((x) => x.count));
+    // find the card that has the maxA
+    const bestCardALetter = findBestCard(originalA, tempMaxA);
 
-    console.log("----");
-    console.log(a, b);
-    console.log("----");
+    const bestCardBLetter = findBestCard(originalb, tempMaxB);
 
+    // if there are J's, replace them with
+    // this is insane
+    const withoutJA = calculateRank(
+      `${originalA[0].card.replaceAll("J", bestCardALetter)} ${
+        originalA[0].bid
+      }`,
+    );
+    const withoutJB = calculateRank(
+      `${originalb[0].card.replaceAll("J", bestCardBLetter)} ${
+        originalb[0].bid
+      }`,
+    );
+
+    const maxA = Math.max(
+      ...withoutJA.filter((_) => _.letter !== "J").map((x) => x.count),
+    );
+    const maxB = Math.max(
+      ...withoutJB.filter((_) => _.letter !== "J").map((x) => x.count),
+    );
+
+    // if the rank is off, sort
     if (maxA < maxB) {
       return -1;
     } else if (maxA > maxB) {
@@ -86,36 +111,36 @@ readFromFile(filePath).then((x) => {
 
     // if they have the same max rank
     // check if you have one pair, or two pair for example
-    const pairsForA = a.reduce((acc, curr) => {
-      if (curr.count === 2) {
-        acc = acc + 1;
-      }
-      return acc;
-    }, 0);
-
-    const pairsForB = b.reduce((acc, curr) => {
-      if (curr.count === 2) {
-        acc = acc + 1;
-      }
-      return acc;
-    }, 0);
-
+    const pairsForA = findPairs(withoutJA);
+    const pairsForB = findPairs(withoutJB);
     if (pairsForA > pairsForB) {
       return 1;
     } else if (pairsForB > pairsForA) {
       return -1;
     }
 
+    // check if full house or three
+    if (maxA && maxB === 3) {
+      // 23332
+      // check if there might be a pair too
+      if (pairsForA > pairsForB) {
+        return 1;
+      } else if (pairsForB > pairsForA) {
+        // TTT98
+        return -1;
+      }
+    }
+
     function checkNextCard(i: number): number {
       if (i < 5) {
         if (
-          (powerMap.get?.(a[0].card[i]) ?? 0) >
-          (powerMap.get?.(b[0].card[i]) ?? 0)
+          (powerMap.get?.(originalA[0].card[i]) ?? 0) >
+          (powerMap.get?.(originalb[0].card[i]) ?? 0)
         ) {
           return 1;
         } else if (
-          (powerMap.get?.(a[0].card[i]) ?? 0) <
-          (powerMap.get?.(b[0].card[i]) ?? 0)
+          (powerMap.get?.(originalA[0].card[i]) ?? 0) <
+          (powerMap.get?.(originalb[0].card[i]) ?? 0)
         ) {
           return -1;
         } else {
@@ -130,11 +155,33 @@ readFromFile(filePath).then((x) => {
     return checkNextCard(0);
   });
 
-  const w = cards.reduce((acc, curr, i) => {
+  const result = cards.reduce((acc, curr, i) => {
     console.log(`rank: ${i + 1}: ${curr[0].bid * (i + 1)}`);
     console.log(curr);
     acc = acc + curr[0].bid * (i + 1);
     return acc;
   }, 0);
-  console.log(w);
+  console.log(result);
 });
+
+function findPairs(withoutJA: Hand[]) {
+  return withoutJA.reduce((acc, curr) => {
+    if (curr.count === 2) {
+      acc = acc + 1;
+    }
+    return acc;
+  }, 0);
+}
+
+function findBestCard(originalA: Hand[], tempMaxA: number) {
+  return (
+    originalA
+      .filter((_) => _.letter !== "J")
+      .filter((x) => x.count === tempMaxA)
+      .sort((a, b) =>
+        (powerMap.get?.(a.letter) ?? 0) > (powerMap.get?.(b.letter) ?? 0)
+          ? -1
+          : 1,
+      )[0]?.letter ?? "1"
+  );
+}
